@@ -6,8 +6,8 @@ int slots[7][3];
 void initSlot(){
   for(int i=0; i<7; i++){
       slots[i][0]=800; // setting default values to 25:00 so that it never matches
-      slots[i][1]=1700;
-      slots[i][2]=2200;
+      slots[i][1]=1400;
+      slots[i][2]=2000;
   }
   // Adding initial slots to EEPROM
   for (int i = 0 ; i < 21 ; i++) {
@@ -24,7 +24,7 @@ void loadSlot(){
 }
 
 // Updating any slot
-void update(int d, int s, int t){
+void update_mem(int d, int s, int t){
   slots[d][s]=t;
   EEPROM.write(d*3+s, t);
 }
@@ -63,8 +63,14 @@ void time_loop(bool * arr,int day, int curr_t)
 //      delay(6000);
 //      beepStop();
 //      ledStop();
-        to_bin(arr,day+s);
-        
+        to_bin(arr,day+s+1);
+        Serial.print("alarm for:");
+        Serial.println(day+s);
+//        Serial.println(arr[0]);
+//        Serial.println(arr[1]);
+//        Serial.println(arr[2]);
+//        Serial.println(arr[3]);
+//        Serial.println(arr[4]);
     }
   }
   

@@ -23,17 +23,35 @@ const char* ntpServer1 = "pool.ntp.org";
 const char* ntpServer2 = "time.nist.gov";
 const long  gmtOffset_sec = 19800;
 
-const String s[7]={"mon","tue","wed","thu","fri","sat","sun"};
+const String days[7]={"sun","mon","tue","wed","thu","fri","sat"};
 
 int pins[5]={25,26,27,12,14};
 
 
-void save_obj(DynamicJsonDocument obj(1024))
+void save_obj(DynamicJsonDocument obj)
 {
-  for(int i=0; i<7; i++)
+  for(int d=0; d<7; d++)
   {
-    String day_tt=obj[days[i]];
-    
+    String day_tt=obj[days[d]]; /*[t1,t2,t3]*/
+    int len = day_tt.length();
+    int day_slots[3];
+    int j=0;
+    String temp = "";
+    for(int i=0; i<len; i++){
+      if(day_tt[i]>='0' && day_tt[i]<='9'){
+        temp.concat(day_tt[i]);
+      }
+      else if(temp.length()>0){
+        day_slots[j]=temp.toInt();
+        j++;
+        temp="";
+      }
+    }
+    for(int i=0; i<3; i++){
+      //Serial.println(day_slots[i]);
+      update_mem(d, i, day_slots[i]);
+      Serial.println(slots[d][i]);
+    }
   }
 }
 
@@ -49,6 +67,8 @@ void handleGet() {
     deserializeJson(obj, data);
     Serial.println("Data: " + data);
     serializeJson(obj, Serial);
+    Serial.println("");
+    save_obj(obj);
 /*    String s=obj["mon"];
  *    Serial.println(s);
  *    object structure -
@@ -144,30 +164,49 @@ int setup_wifi()
 //    Serial.println("Client disconnected");
 //  }
 //}
-
+bool UNSET=true;
 void setup() {
   Serial.begin(115200);
   setup_wifi();
   configTime(gmtOffset_sec, 0, ntpServer1, ntpServer2);
   setup_mem();
+  for(int i=0; i<5; i++)
+  {
+    pinMode(pins[i],OUTPUT);
+  }
   
 }
 void set_out(bool *arr)
 {
   for(int i=0; i<5; i++)
-  if(arr[i]) digitalWrite(pins[i],HIGH);
+  {
+    if(arr[i]) digitalWrite(pins[i],HIGH);
+    else digitalWrite(pins[i],LOW);
+  }
 }
 void loop() {
   bool arr[5];
     struct tm t;
     server.handleClient();
-    if(getLocalTime(&t))
+    //Serial.print("UNset=");
+    //Serial.println(UNSET);
+    if(UNSET and getLocalTime(&t))
     {
       Serial.println(t.tm_wday);
       Serial.println(t.tm_hour*100+t.tm_min);
       time_loop(arr,t.tm_wday,t.tm_hour*100+t.tm_min);
       set_out(arr);
+      rtc.setTimeStruct(t);
+      UNSET=false;
     }
+    else if(!UNSET)
+    {
+      time_loop(arr,rtc.getDayofWeek(),rtc.getHour()*100+rtc.getMinute());
+      //Serial.println(rtc.getDayofWeek());
+      //Serial.println(rtc.getHour()*100+rtc.getMinute());
+      set_out(arr);
+    }
+    
   //Serial.println(WiFi.status()==WL_CONNECTED);
   //Serial.println(WiFi.localIP());
   
