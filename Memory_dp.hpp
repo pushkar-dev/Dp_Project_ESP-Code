@@ -24,9 +24,9 @@ void loadSlot(){
 }
 
 // Updating any slot
-void update(int d, int s, int time){
-  slots[d][s]=time;
-  EEPROM.write(d*3+s, time);
+void update(int d, int s, int t){
+  slots[d][s]=t;
+  EEPROM.write(d*3+s, t);
 }
 
 // Geting the time of a slot
@@ -35,14 +35,13 @@ int getSlot(int d, int s){
 }
 
 // To get status of led
-bool[] getStatus(int d, int s){
-  int num = d*3 + s;
-  int arr[5];
-  for(int i=0; i<=4; i++){
-    arr[i]=num%2;
-    num=num/2;
+void to_bin(bool *res, int a)
+{
+  for(int i=0; i<5; i++)
+  {
+    res[i]=a%2;
+    a/=2;
   }
-  return arr;
 }
 
 // sets up memory
@@ -54,15 +53,19 @@ void setup_mem()
 }
 
 
-void time_loop(int day, int curr_t)
+void time_loop(bool * arr,int day, int curr_t)
 {
+  to_bin(arr,0);
   for(int s=0; s<3; s++){
     if(slots[day][s]<=curr_t && curr_t<slots[day][s]+2){
-      beepStart();
-      ledStart(day, s);
-      delay(6000);
-      beepStop();
-      ledStop();
+//      beepStart();
+//      ledStart(day, s);
+//      delay(6000);
+//      beepStop();
+//      ledStop();
+        to_bin(arr,day+s);
+        
     }
   }
+  
 }
