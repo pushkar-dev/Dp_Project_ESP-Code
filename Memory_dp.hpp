@@ -57,6 +57,8 @@ void time_loop(bool * arr,int day, int curr_t)
 {
   to_bin(arr,0);
   for(int s=0; s<3; s++){
+    Serial.println(slots[day][s]);
+    Serial.println(curr_t);
     if(slots[day][s]<=curr_t && curr_t<slots[day][s]+2){
 //      beepStart();
 //      ledStart(day, s);

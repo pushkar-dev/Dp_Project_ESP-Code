@@ -201,7 +201,7 @@ void loop() {
     }
     else if(!UNSET)
     {
-      time_loop(arr,rtc.getDayofWeek(),rtc.getHour()*100+rtc.getMinute());
+      time_loop(arr,rtc.getDayofWeek(),rtc.getHour(true)*100+rtc.getMinute());
       //Serial.println(rtc.getDayofWeek());
       //Serial.println(rtc.getHour()*100+rtc.getMinute());
       set_out(arr);
