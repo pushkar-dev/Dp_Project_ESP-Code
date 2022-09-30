@@ -53,21 +53,21 @@ void setup_mem()
 }
 
 
-void time_loop(bool * arr,int day, int curr_t)
+int  time_loop(int day, int curr_t)
 {
-  to_bin(arr,0);
+//  to_bin(arr,0);
   for(int s=0; s<3; s++){
-    Serial.println(slots[day][s]);
-    Serial.println(curr_t);
+    //Serial.println(slots[day][s]);
+    //Serial.println(curr_t);
     if(slots[day][s]<=curr_t && curr_t<slots[day][s]+2){
 //      beepStart();
 //      ledStart(day, s);
 //      delay(6000);
 //      beepStop();
 //      ledStop();
-        to_bin(arr,day+s+1);
         Serial.print("alarm for:");
         Serial.println(day+s);
+        return day+s+1;
 //        Serial.println(arr[0]);
 //        Serial.println(arr[1]);
 //        Serial.println(arr[2]);
@@ -75,5 +75,6 @@ void time_loop(bool * arr,int day, int curr_t)
 //        Serial.println(arr[4]);
     }
   }
+  return 0;
   
 }

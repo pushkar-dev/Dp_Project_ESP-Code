@@ -26,7 +26,8 @@ const long  gmtOffset_sec = 19800;
 const String days[7]={"sun","mon","tue","wed","thu","fri","sat"};
 
 int pins[5]={25,26,27,12,14};
-
+int gpios[21]={2,3,4,5,12,13,14,15,16,17,18,19,20,21,22,23,25,26,27,32,33};
+//int BUZZER=30;
 
 void save_obj(DynamicJsonDocument obj)
 {
@@ -101,79 +102,17 @@ int setup_wifi()
     return 1;
 }
 
-//int setup_bt()
-//{
-//  // WiFi.scanNetworks will return the number of networks found
-//    int n = WiFi.scanNetworks();
-//    Serial.println("scan done");
-//    if (n == 0) {
-//       Serial.println("no networks found");
-//    } else 
-//    {
-//      SerialBT.println("Choose a wifi name:-\n");
-//      SerialBT.println(n);
-//      SerialBT.println(" networks found");
-//      for (int i = 0; i < n; ++i) 
-//      {
-//      // Print SSID and RSSI for each network found
-//        SerialBT.print(i + 1);
-//        SerialBT.print(": ");
-//        SerialBT.print(WiFi.SSID(i));
-//        //Serial.print(" (");
-//        //Serial.print(WiFi.RSSI(i));
-//        //Serial.print(")");
-//        SerialBT.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
-//        delay(10);
-//      }
-//      SerialBT.println("");
-//      SerialBT.println("Choose the serial number corresponding to wifi name...:");
-//      int x=SerialBT.readString().toInt();
-//      SerialBT.println("Enter wifi password:");
-//      password=SerialBT.readString();
-//      ssid=WiFi.SSID(x-1);
-//      int res=setup_wifi();
-//      if(res)
-//      {
-//        SerialBT.println("Connected Successfully:-");
-//        SerialBT.println("Device IP-");
-//        SerialBT.println(WiFi.localIP());
-//        SerialBT.println("Copy above and paste it in the mobile app!");
-//        return 1; //success
-//      }
-//      else 
-//      {
-//        SerialBT.println("Try again sorry");
-//        return 0;
-//      }
-//      
-//    }
-//
-//}
-
-//void callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
-//  if(event == ESP_SPP_SRV_OPEN_EVT){
-//    if(SerialBT.available())
-//    if(setup_bt())
-//    {
-//  
-
-//    }
-//    else WIFI_ON=false;
-//  }
-//  else if(event == ESP_SPP_CLOSE_EVT ){
-//    Serial.println("Client disconnected");
-//  }
-//}
 bool UNSET=true;
 void setup() {
   Serial.begin(115200);
   setup_wifi();
   configTime(gmtOffset_sec, 0, ntpServer1, ntpServer2);
   setup_mem();
-  for(int i=0; i<5; i++)
+  for(int i=0; i<21; i++)
   {
-    pinMode(pins[i],OUTPUT);
+    pinMode(gpios[i],OUTPUT);
   }
+//  pinMode(BUZZER,OUTPUT);
   
 }
 void set_out(bool *arr)
@@ -184,27 +123,47 @@ void set_out(bool *arr)
     else digitalWrite(pins[i],LOW);
   }
 }
+int lastIndex=0;
+void set_out_unmulti(int i)
+{
+  if(lastIndex!=i) digitalWrite(gpios[lastIndex],LOW);
+  if(i==0) return;
+  lastIndex=i-1;
+  digitalWrite(gpios[i],HIGH);
+}
+//void setBuzzer(bool val)
+//{
+//  if(val) digitalWrite(30,HIGH);
+//  else digitalWrite(30,LOW);
+//}
 void loop() {
-  bool arr[5];
+     int gpioindex;
     struct tm t;
     server.handleClient();
     //Serial.print("UNset=");
     //Serial.println(UNSET);
     if(UNSET and getLocalTime(&t))
     {
-      Serial.println(t.tm_wday);
-      Serial.println(t.tm_hour*100+t.tm_min);
-      time_loop(arr,t.tm_wday,t.tm_hour*100+t.tm_min);
-      set_out(arr);
+      //Serial.println(t.tm_wday);
+      //Serial.println(t.tm_hour*100+t.tm_min);
+      time_loop(t.tm_wday,t.tm_hour*100+t.tm_min);
+      //set_out(arr);
       rtc.setTimeStruct(t);
       UNSET=false;
     }
     else if(!UNSET)
     {
-      time_loop(arr,rtc.getDayofWeek(),rtc.getHour(true)*100+rtc.getMinute());
+      gpioindex=time_loop(rtc.getDayofWeek(),rtc.getHour(true)*100+rtc.getMinute());
       //Serial.println(rtc.getDayofWeek());
       //Serial.println(rtc.getHour()*100+rtc.getMinute());
-      set_out(arr);
+      //set_out(arr);
+      set_out_unmulti(gpioindex);
+      if(gpioindex!=lastIndex)
+      {
+        Serial.println(gpioindex);
+        Serial.println(gpios[gpioindex]);
+      }
+      //setBuzzer(gpioindex>0);
     }
     
   //Serial.println(WiFi.status()==WL_CONNECTED);
