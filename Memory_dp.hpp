@@ -59,7 +59,7 @@ int  time_loop(int day, int curr_t)
   for(int s=0; s<3; s++){
     //Serial.println(slots[day][s]);
     //Serial.println(curr_t);
-    if(slots[day][s]<=curr_t && curr_t<slots[day][s]+2){
+    if(slots[day][s]<=curr_t && curr_t<slots[day][s]+1){
 //      beepStart();
 //      ledStart(day, s);
 //      delay(6000);
@@ -67,7 +67,7 @@ int  time_loop(int day, int curr_t)
 //      ledStop();
         Serial.print("alarm for:");
         Serial.println(day+s);
-        return day+s+1;
+        return (day*3)+s+1;
 //        Serial.println(arr[0]);
 //        Serial.println(arr[1]);
 //        Serial.println(arr[2]);

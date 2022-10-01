@@ -27,7 +27,7 @@ const String days[7]={"sun","mon","tue","wed","thu","fri","sat"};
 
 int pins[5]={25,26,27,12,14};
 int gpios[21]={2,3,4,5,12,13,14,15,16,17,18,19,20,21,22,23,25,26,27,32,33};
-//int BUZZER=30;
+int BUZZER=2;
 
 void save_obj(DynamicJsonDocument obj)
 {
@@ -112,7 +112,7 @@ void setup() {
   {
     pinMode(gpios[i],OUTPUT);
   }
-//  pinMode(BUZZER,OUTPUT);
+  pinMode(BUZZER,OUTPUT);
   
 }
 void set_out(bool *arr)
@@ -126,16 +126,17 @@ void set_out(bool *arr)
 int lastIndex=0;
 void set_out_unmulti(int i)
 {
-  if(lastIndex!=i) digitalWrite(gpios[lastIndex],LOW);
-  if(i==0) return;
+  setBuzzer(i>0);
+  if(i==0) {digitalWrite(gpios[lastIndex],LOW);lastIndex=0;return;}
+  if(lastIndex!=i-1) digitalWrite(gpios[lastIndex],LOW);
   lastIndex=i-1;
-  digitalWrite(gpios[i],HIGH);
+  digitalWrite(gpios[i-1],HIGH);
 }
-//void setBuzzer(bool val)
-//{
-//  if(val) digitalWrite(30,HIGH);
-//  else digitalWrite(30,LOW);
-//}
+void setBuzzer(bool val)
+{
+  if(val) digitalWrite(BUZZER,HIGH);
+  else digitalWrite(BUZZER,LOW);
+}
 void loop() {
      int gpioindex;
     struct tm t;
@@ -161,7 +162,7 @@ void loop() {
       if(gpioindex!=lastIndex)
       {
         Serial.println(gpioindex);
-        Serial.println(gpios[gpioindex]);
+        if(gpioindex>0) Serial.println(gpios[gpioindex-1]);
       }
       //setBuzzer(gpioindex>0);
     }
